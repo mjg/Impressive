@@ -356,12 +356,12 @@ def FixHyperlinks(page):
 
 def ParsePDF(filename):
     try:
-        assert 0 == subprocess.Popen([pdftkPath, filename, "output", TempFileName + ".pdf", "uncompress"]).wait()
+        assert 0 == subprocess.Popen([mutoolPath, "clean", "-d", filename, TempFileName + ".pdf"]).wait()
     except OSError:
-        print >>sys.stderr, "Note: pdftk not found, hyperlinks disabled."
+        print >>sys.stderr, "Note: mutool not found, hyperlinks disabled."
         return
     except AssertionError:
-        print >>sys.stderr, "Note: pdftk failed, hyperlinks disabled."
+        print >>sys.stderr, "Note: mutool failed, hyperlinks disabled."
         return
 
     count = 0
@@ -379,7 +379,7 @@ def ParsePDF(filename):
             del pdf
             return count
         except IOError:
-            print >>sys.stderr, "Note: file produced by pdftk not readable, hyperlinks disabled."
+            print >>sys.stderr, "Note: file produced by mutool not readable, hyperlinks disabled."
         except PDFError, e:
             print >>sys.stderr, "Note: error in PDF file, hyperlinks disabled."
             print >>sys.stderr, "      PDF parser error message:", e
