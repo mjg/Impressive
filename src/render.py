@@ -81,7 +81,7 @@ class MuPDFRenderer(PDFRendererBase):
     name = "MuPDF"
     binaries = ["mudraw", "pdfdraw"]
     test_run_args = []
-    required_options = ["o", "r", "b"]
+    required_options = ["o", "r", "A"]
 
     # helper object for communication with the reader thread
     class ThreadComm(object):
@@ -124,7 +124,7 @@ class MuPDFRenderer(PDFRendererBase):
             except (OSError, IOError, AttributeError):
                 pass
         if not antialias:
-            aa_opts = ["-b", "0"]
+            aa_opts = ["-A", "0"]
         else:
             aa_opts = []
         try:
