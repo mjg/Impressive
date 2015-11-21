@@ -93,18 +93,6 @@ def b2s(b):
     if b: return "Y"
     return "N"
 
-# extract a number at the beginning of a string
-def num(s):
-    s = s.strip()
-    r = ""
-    while s[0] in "0123456789":
-        r += s[0]
-        s = s[1:]
-    try:
-        return int(r)
-    except ValueError:
-        return -1
-
 # linearly interpolate between two floating-point RGB colors represented as tuples
 def lerpColor(a, b, t):
     return tuple([min(1.0, max(0.0, x + t * (y - x))) for x, y in zip(a, b)])
@@ -119,11 +107,22 @@ def my_stat(filename):
 
 # determine (pagecount,width,height) of a PDF file
 def analyze_pdf(filename):
-    f = file(filename,"rb")
+    t = TempFileName + ".txt"
+    f = file(t, "w")
+    try:
+        assert 0 == subprocess.Popen([mutoolPath, "info", filename], stdout=f).wait()
+    except OSError:
+        print >>sys.stderr, "Note: mutool not found, cannot determine output size."
+        return
+    except AssertionError:
+        print >>sys.stderr, "Note: mutool failed, cannot determine output size."
+        return
+    f.close()
+    f = file(t, "r")
     pdf = f.read()
     f.close()
-    box = map(float, pdf.split("/MediaBox",1)[1].split("]",1)[0].split("[",1)[1].strip().split())
-    return (max(map(num, pdf.split("/Count")[1:])), box[2]-box[0], box[3]-box[1])
+    box = map(float, pdf.split("Mediaboxes",1)[1].split("]",1)[0].split("[",1)[1].strip().split())
+    return (int(pdf.split("Pages:")[1].split()[0]), box[2]-box[0], box[3]-box[1])
 
 # unescape &#123; literals in PDF files
 re_unescape = re.compile(r'&#[0-9]+;')
