@@ -25,7 +25,6 @@ if os.name == "nt":
             if os.path.isfile(path):
                 return path
         return binary  # fall-back if not found
-    pdftkPath = FindBinary("pdftk.exe")
     mutoolPath = FindBinary("mutool.exe")
     GhostScriptPlatformOptions = ["-I" + os.path.join(root, "gs")]
     try:
@@ -51,7 +50,6 @@ else:
     MPlayerPath = "mplayer"
     MPlayerPlatformOptions = [ "-vo", "gl" ]
     MPlayerColorKey = False
-    pdftkPath = "pdftk"
     mutoolPath = "mutool"
     FontPath = ["/usr/share/fonts", "/usr/local/share/fonts", "/usr/X11R6/lib/X11/fonts/TTF"]
     FontList = ["DejaVuSans.ttf", "Vera.ttf", "Verdana.ttf"]

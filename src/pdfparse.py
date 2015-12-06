@@ -368,6 +368,10 @@ def ParsePDF(filename):
     try:
         try:
             pdf = PDFParser(TempFileName + ".pdf")
+            SetFileProp(filename, 'page_count', pdf.page_count)
+            box = pdf.box.values()[0]
+            SetFileProp(filename, 'width', box[2]-box[0])
+            SetFileProp(filename, 'height', box[3]-box[1])
             for page, annots in pdf.GetHyperlinks().iteritems():
                 for page_offset in FileProps[filename]['offsets']:
                     for a in annots:

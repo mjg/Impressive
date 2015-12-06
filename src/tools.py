@@ -105,25 +105,6 @@ def my_stat(filename):
         return None
     return (s.st_size, s.st_mtime, s.st_ctime, s.st_mode)
 
-# determine (pagecount,width,height) of a PDF file
-def analyze_pdf(filename):
-    t = TempFileName + ".txt"
-    f = file(t, "w")
-    try:
-        assert 0 == subprocess.Popen([mutoolPath, "info", filename], stdout=f).wait()
-    except OSError:
-        print >>sys.stderr, "Note: mutool not found, cannot determine output size."
-        return
-    except AssertionError:
-        print >>sys.stderr, "Note: mutool failed, cannot determine output size."
-        return
-    f.close()
-    f = file(t, "r")
-    pdf = f.read()
-    f.close()
-    box = map(float, pdf.split("Mediaboxes",1)[1].split("]",1)[0].split("[",1)[1].strip().split())
-    return (int(pdf.split("Pages:")[1].split()[0]), box[2]-box[0], box[3]-box[1])
-
 # unescape &#123; literals in PDF files
 re_unescape = re.compile(r'&#[0-9]+;')
 def decode_literal(m):
@@ -137,45 +118,6 @@ def decode_literal(m):
         return '?'
 def unescape_pdf(s):
     return re_unescape.sub(decode_literal, s)
-
-# parse pdftk output
-def pdftkParse(filename, page_offset=0):
-    f = file(filename, "r")
-    InfoKey = None
-    BookmarkTitle = None
-    Title = None
-    Pages = 0
-    for line in f.xreadlines():
-        try:
-            key, value = [item.strip() for item in line.split(':', 1)]
-        except ValueError:
-            continue
-        key = key.lower()
-        if key == "numberofpages":
-            Pages = int(value)
-        elif key == "infokey":
-            InfoKey = value.lower()
-        elif (key == "infovalue") and (InfoKey == "title"):
-            Title = unescape_pdf(value)
-            InfoKey = None
-        elif key == "bookmarktitle":
-            BookmarkTitle = unescape_pdf(value)
-        elif key == "bookmarkpagenumber" and BookmarkTitle:
-            try:
-                page = int(value)
-                if not GetPageProp(page + page_offset, '_title'):
-                    SetPageProp(page + page_offset, '_title', BookmarkTitle)
-            except ValueError:
-                pass
-            BookmarkTitle = None
-    f.close()
-    if AutoOverview:
-        SetPageProp(page_offset + 1, '_overview', True)
-        for page in xrange(page_offset + 2, page_offset + Pages):
-            SetPageProp(page, '_overview', \
-                        not(not(GetPageProp(page + AutoOverview - 1, '_title'))))
-        SetPageProp(page_offset + Pages, '_overview', True)
-    return (Title, Pages)
 
 # translate pixel coordinates to normalized screen coordinates
 def MouseToScreen(mousepos):

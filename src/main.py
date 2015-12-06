@@ -71,22 +71,17 @@ def main():
                    (ScreenWidth + Overscan, ScreenHeight + Overscan)]
             res = [(72.0, 72.0), (72.0, 72.0)]
 
-            # phase 1: internal PDF parser
             try:
-                pages, pdf_width, pdf_height = analyze_pdf(name)
+                ParsePDF(name)
+                pages = GetFileProp(name, 'page_count')
+                pdf_width = GetFileProp(name, 'width')
+                pdf_height = GetFileProp(name, 'height')
+                title = None
                 out = [ZoomToFit((pdf_width, pdf_height * PAR)),
                        ZoomToFit((pdf_height, pdf_width * PAR))]
                 res = [(out[0][0] * 72.0 / pdf_width, out[0][1] * 72.0 / pdf_height),
                        (out[1][1] * 72.0 / pdf_width, out[1][0] * 72.0 / pdf_height)]
-            except KeyboardInterrupt:
-                raise
-            except:
-                pass
 
-            # phase 2: use pdftk
-            try:
-                assert 0 == subprocess.Popen([pdftkPath, name, "dump_data", "output", TempFileName + ".txt"]).wait()
-                title, pages = pdftkParse(TempFileName + ".txt", PageCount)
                 if title and (len(FileList) == 1):
                     DocumentTitle = title
             except KeyboardInterrupt:
