@@ -72,7 +72,7 @@ def main():
             res = [(72.0, 72.0), (72.0, 72.0)]
 
             try:
-                ParsePDF(name)
+                ParsePDF(name, PageCount)
                 pages = GetFileProp(name, 'page_count')
                 pdf_width = GetFileProp(name, 'width')
                 pdf_height = GetFileProp(name, 'height')
@@ -92,6 +92,8 @@ def main():
             # Image File
             pages = 1
             SetPageProp(PageCount + 1, '_title', os.path.split(name)[-1])
+            SetFileProp(name, 'pages', GetFileProp(name, 'pages', []) + [PageCount + 1])
+            SetFileProp(name, 'offsets', GetFileProp(name, 'offsets', []) + [PageCount])
 
         # validity check
         if not pages:
@@ -105,8 +107,6 @@ def main():
             if ispdf: SetPageProp(page, '_page', page - PageCount)
             title = GetFileProp(name, 'title')
             if title: SetPageProp(page, '_title', title)
-        SetFileProp(name, 'pages', GetFileProp(name, 'pages', []) + pagerange)
-        SetFileProp(name, 'offsets', GetFileProp(name, 'offsets', []) + [PageCount])
         if not GetFileProp(name, 'stat'): SetFileProp(name, 'stat', my_stat(name))
         if ispdf:
             SetFileProp(name, 'out', out)

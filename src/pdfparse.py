@@ -354,7 +354,7 @@ def FixHyperlinks(page):
     SetPageProp(page, '_href', href)
 
 
-def ParsePDF(filename):
+def ParsePDF(filename, PageCount=None):
     try:
         assert 0 == subprocess.Popen([mutoolPath, "clean", "-d", filename, TempFileName + ".pdf"]).wait()
     except OSError:
@@ -372,8 +372,12 @@ def ParsePDF(filename):
             box = pdf.box.values()[0]
             SetFileProp(filename, 'width', box[2]-box[0])
             SetFileProp(filename, 'height', box[3]-box[1])
+            if PageCount is not None:
+                SetFileProp(filename, 'pages', GetFileProp(filename, 'pages', []) + list(range(PageCount + 1, PageCount + pdf.page_count + 1)))
+                SetFileProp(filename, 'offsets', GetFileProp(filename, 'offsets', []) + [PageCount])
+
             for page, annots in pdf.GetHyperlinks().iteritems():
-                for page_offset in FileProps[filename]['offsets']:
+                for page_offset in GetFileProp(filename, 'offsets', []):
                     for a in annots:
                         AddHyperlink(page_offset, page, a[4], a[:4], pdf.box[page], pdf.rotate[page])
                 count += len(annots)
