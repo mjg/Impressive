@@ -86,8 +86,8 @@ def main():
                     DocumentTitle = title
             except KeyboardInterrupt:
                 raise
-            except:
-                pass
+            #except:
+            #    pass
         else:
             # Image File
             pages = 1

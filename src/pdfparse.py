@@ -43,7 +43,7 @@ class PDFParser:
         self.xref = {}
         while offset:
             newxref = self.xref
-            self.xref, rootref, offset = self.parse_trailer(offset)
+            self.xref, rootref, inforef, offset = self.parse_trailer(offset)
             self.xref.update(newxref)
 
         # scan the page and names tree
@@ -54,6 +54,11 @@ class PDFParser:
         self.box = {}
         self.names = {}
         self.rotate = {}
+        self.info = {}
+        try:
+            self.info.update(pdf.getobj(inforef))
+        except PDFError:
+            pass # no info catalog
         root = self.getobj(rootref, 'Catalog')
         try:
             self.scan_page_tree(root['Pages'].ref)
@@ -191,7 +196,13 @@ class PDFParser:
             raise PDFError, "root catalog entry missing"
         except AttributeError:
             raise PDFError, "root catalog entry is not a reference"
-        return (xref, rootref, trailer.get('Prev', 0))
+        try:
+            inforef = trailer['Info'].ref
+        except KeyError:
+            raise PDFError, "info catalog entry missing"
+        except AttributeError:
+            raise PDFError, "info catalog entry is not a reference"
+        return (xref, rootref, inforef, trailer.get('Prev', 0))
 
     def scan_page_tree(self, obj, mbox=None, cbox=None, rotate=0):
         try:
@@ -355,6 +366,7 @@ def FixHyperlinks(page):
 
 
 def ParsePDF(filename, PageCount=None):
+    global FileProps
     try:
         assert 0 == subprocess.Popen([mutoolPath, "clean", "-d", filename, TempFileName + ".pdf"]).wait()
     except OSError:
@@ -370,8 +382,10 @@ def ParsePDF(filename, PageCount=None):
             pdf = PDFParser(TempFileName + ".pdf")
             SetFileProp(filename, 'page_count', pdf.page_count)
             box = pdf.box.values()[0]
+            #SetProp(FileProps, filename, 'title', pdf.title)
             SetFileProp(filename, 'width', box[2]-box[0])
             SetFileProp(filename, 'height', box[3]-box[1])
+            print FileProps
             if PageCount is not None:
                 SetFileProp(filename, 'pages', GetFileProp(filename, 'pages', []) + list(range(PageCount + 1, PageCount + pdf.page_count + 1)))
                 SetFileProp(filename, 'offsets', GetFileProp(filename, 'offsets', []) + [PageCount])
