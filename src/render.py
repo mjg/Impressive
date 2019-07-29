@@ -63,7 +63,7 @@ class PDFRendererBase(object):
                 return process
             if process.wait() != 0:
                 raise RenderError("rendering failed")
-        except OSError, e:
+        except OSError as e:
             raise RenderError("could not start renderer - %s" % e)
 
     def load(self, imgfile, autoremove=False):
@@ -72,7 +72,7 @@ class PDFRendererBase(object):
             img.load()
         except (KeyboardInterrupt, SystemExit):
             raise
-        except IOError, e:
+        except IOError as e:
             raise RenderError("could not read image file - %s" % e)
         if autoremove:
             self.remove(imgfile)
@@ -108,7 +108,7 @@ class MuPDFRenderer(PDFRendererBase):
         if pipe:
             try:
                 out, err = proc.communicate()
-            except EnvironmentError, e:
+            except EnvironmentError as e:
                 raise RenderError("could not run renderer - %s" % e)
             if not out:
                 raise RenderError("renderer returned empty image")
@@ -149,7 +149,7 @@ class MuPDFLegacyRenderer(PDFRendererBase):
             f = open(comm.imgfile, 'rb')
             comm.buffer = cStringIO.StringIO(f.read())
             f.close()
-        except IOError, e:
+        except IOError as e:
             comm.error = "could not open FIFO for reading - %s" % e
 
     def render(self, filename, page, res, antialias=True):
@@ -229,7 +229,7 @@ class XpdfRenderer(PDFRendererBase):
             TempFileName
         ])
         digits = GetFileProp(filename, 'digits', 6)
-        try_digits = range(6, 0, -1)
+        try_digits = list(range(6, 0, -1))
         try_digits.sort(key=lambda n: abs(n - digits))
         try_digits = [(n, TempFileName + ("-%%0%dd.ppm" % n) % page) for n in try_digits]
         for digits, imgfile in try_digits:
@@ -277,17 +277,17 @@ def InitPDFRenderer():
             continue
         try:
             PDFRenderer = r_class(PDFRendererPath)
-            print >>sys.stderr, "PDF renderer:", PDFRenderer.name
+            print("PDF renderer:", PDFRenderer.name, file=sys.stderr)
             return PDFRenderer
-        except RendererUnavailable, e:
+        except RendererUnavailable as e:
             if Verbose:
-                print >>sys.stderr, "Not using %s for PDF rendering:" % r_class.name, e
+                print("Not using %s for PDF rendering:" % r_class.name, e, file=sys.stderr)
             else:
                 fail_reasons.append((r_class.name, str(e)))
-    print >>sys.stderr, "ERROR: PDF renderer initialization failed."
+    print("ERROR: PDF renderer initialization failed.", file=sys.stderr)
     for item in fail_reasons:
-        print >>sys.stderr, "       - %s: %s" % item
-    print >>sys.stderr, "       Display of PDF files will not be supported."
+        print("       - %s: %s" % item, file=sys.stderr)
+    print("       Display of PDF files will not be supported.", file=sys.stderr)
 
 
 def ApplyRotation(img, rot):
@@ -348,8 +348,8 @@ def RenderPDF(page, MayAdjustResolution, ZoomMode):
     # call the renderer
     try:
         img = PDFRenderer.render(SourceFile, RealPage, useres, use_aa)
-    except RenderError, e:
-        print >>sys.stderr, "ERROR: failed to render page %d:" % page, e
+    except RenderError as e:
+        print("ERROR: failed to render page %d:" % page, e, file=sys.stderr)
         return DummyPage()
 
     # apply rotation
@@ -434,7 +434,7 @@ def LoadImage(page, zoom=False, img=None):
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
-            print >>sys.stderr, "Image file `%s' is broken." % GetPageProp(page, '_file')
+            print("Image file `%s' is broken." % GetPageProp(page, '_file'), file=sys.stderr)
             return DummyPage()
 
     # apply rotation
@@ -514,7 +514,7 @@ def LoadVideoPreview(page, zoom):
     if img:
         return LoadImage(page, zoom, img)
     else:
-        print >>sys.stderr, "Can not generate preview image for video file `%s' (%s)." % (GetPageProp(page, '_file'), reason)
+        print("Can not generate preview image for video file `%s' (%s)." % (GetPageProp(page, '_file'), reason), file=sys.stderr)
         return DummyPage()
 ffmpegWorks = True
 mplayerWorks = True
@@ -594,8 +594,8 @@ def PageImage(page, ZoomMode=False, RenderMode=False):
                     t0 = time.time()
                     img.thumbnail((sx, sy), Image.ANTIALIAS)
                     if (time.time() - t0) > 0.5:
-                        print >>sys.stderr, "Note: Your system seems to be quite slow; falling back to a faster,"
-                        print >>sys.stderr, "      but slightly lower-quality overview page rendering mode"
+                        print("Note: Your system seems to be quite slow; falling back to a faster,", file=sys.stderr)
+                        print("      but slightly lower-quality overview page rendering mode", file=sys.stderr)
                         HighQualityOverview = False
                 else:
                     img.thumbnail((sx * 2, sy * 2), Image.NEAREST)
@@ -629,10 +629,10 @@ def RenderPage(page, target):
         pass  # clear all OpenGL errors
     gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGB, TexWidth, TexHeight, 0, gl.RGB, gl.UNSIGNED_BYTE, PageImage(page))
     if gl.GetError():
-        print >>sys.stderr, "I'm sorry, but your graphics card is not capable of rendering presentations"
-        print >>sys.stderr, "in this resolution. Either the texture memory is exhausted, or there is no"
-        print >>sys.stderr, "support for large textures (%dx%d). Please try to run Impressive in a" % (TexWidth, TexHeight)
-        print >>sys.stderr, "smaller resolution using the -g command-line option."
+        print("I'm sorry, but your graphics card is not capable of rendering presentations", file=sys.stderr)
+        print("in this resolution. Either the texture memory is exhausted, or there is no", file=sys.stderr)
+        print("support for large textures (%dx%d). Please try to run Impressive in a" % (TexWidth, TexHeight), file=sys.stderr)
+        print("smaller resolution using the -g command-line option.", file=sys.stderr)
         sys.exit(1)
 
 # background rendering thread
@@ -647,18 +647,18 @@ def RenderThread(p1, p2):
             if RTrestart: break
             SafeCall(ParsePDF, [pdf])
         if RTrestart: continue
-        for page in xrange(1, PageCount + 1):
+        for page in range(1, PageCount + 1):
             if RTrestart: break
             if (page != p1) and (page != p2) \
             and (page >= PageRangeStart) and (page <= PageRangeEnd):
                 SafeCall(PageImage, [page])
     RTrunning = False
     if CacheMode >= FileCache:
-        print >>sys.stderr, "Background rendering finished, used %.1f MiB of disk space." %\
-              (CacheFilePos / 1048576.0)
+        print("Background rendering finished, used %.1f MiB of disk space." %\
+              (CacheFilePos / 1048576.0), file=sys.stderr)
     elif CacheMode >= MemCache:
-        print >>sys.stderr, "Background rendering finished, using %.1f MiB of memory." %\
-              (sum(map(len, PageCache.itervalues())) / 1048576.0)
+        print("Background rendering finished, using %.1f MiB of memory." %\
+              (sum(map(len, iter(PageCache.values()))) / 1048576.0), file=sys.stderr)
 
 
 ##### RENDER MODE ##############################################################
@@ -668,20 +668,20 @@ def DoRender():
     TexWidth = ScreenWidth
     TexHeight = ScreenHeight
     if os.path.exists(RenderToDirectory):
-        print >>sys.stderr, "Destination directory `%s' already exists," % RenderToDirectory
-        print >>sys.stderr, "refusing to overwrite anything."
+        print("Destination directory `%s' already exists," % RenderToDirectory, file=sys.stderr)
+        print("refusing to overwrite anything.", file=sys.stderr)
         return 1
     try:
         os.mkdir(RenderToDirectory)
-    except OSError, e:
-        print >>sys.stderr, "Cannot create destination directory `%s':" % RenderToDirectory
-        print >>sys.stderr, e.strerror
+    except OSError as e:
+        print("Cannot create destination directory `%s':" % RenderToDirectory, file=sys.stderr)
+        print(e.strerror, file=sys.stderr)
         return 1
-    print >>sys.stderr, "Rendering presentation into `%s'" % RenderToDirectory
-    for page in xrange(1, PageCount + 1):
+    print("Rendering presentation into `%s'" % RenderToDirectory, file=sys.stderr)
+    for page in range(1, PageCount + 1):
         PageImage(page, RenderMode=True).save("%s/page%04d.png" % (RenderToDirectory, page))
         sys.stdout.write("[%d] " % page)
         sys.stdout.flush()
-    print >>sys.stderr
-    print >>sys.stderr, "Done."
+    print(file=sys.stderr)
+    print("Done.", file=sys.stderr)
     return 0

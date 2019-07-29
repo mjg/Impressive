@@ -309,12 +309,12 @@ class GLShader(object):
         if not(attributes) and hasattr(self, 'attributes'):
             attributes = self.attributes
         if isinstance(attributes, dict):
-            attributes = attributes.items()
+            attributes = list(attributes.items())
         if not(uniforms) and hasattr(self, 'uniforms'):
             uniforms = self.uniforms
         if isinstance(uniforms, dict):
-            uniforms = uniforms.items()
-        uniforms = [((u, None) if isinstance(u, basestring) else u) for u in uniforms]
+            uniforms = list(uniforms.items())
+        uniforms = [((u, None) if isinstance(u, str) else u) for u in uniforms]
         if (loglevel is None) and hasattr(self, 'loglevel'):
             loglevel = self.loglevel
         if loglevel is None:
@@ -329,11 +329,11 @@ class GLShader(object):
                 log = "" 
             if force_log or ((loglevel >= self.LOG_IF_NOT_EMPTY) and log):
                 if status:
-                    print >>sys.stderr, "Info: log for %s %s:" % (self.__class__.__name__, action)
+                    print("Info: log for %s %s:" % (self.__class__.__name__, action), file=sys.stderr)
                 else:
-                    print >>sys.stderr, "Error: %s %s failed - log information follows:" % (self.__class__.__name__, action)
+                    print("Error: %s %s failed - log information follows:" % (self.__class__.__name__, action), file=sys.stderr)
                 for line in log.split('\n'):
-                    print >>sys.stderr, '>', line.rstrip()
+                    print('>', line.rstrip(), file=sys.stderr)
             if not status:
                 raise GLShaderCompileError("failure during %s %s" % (self.__class__.__name__, action))
         def handle_shader(type_enum, type_name, src):
@@ -351,9 +351,9 @@ class GLShader(object):
         handle_shader(gl.VERTEX_SHADER, "vertex", vs)
         handle_shader(gl.FRAGMENT_SHADER, "fragment", fs)
         for attr in attributes:
-            if not isinstance(attr, basestring):
+            if not isinstance(attr, str):
                 loc, name = attr
-                if isinstance(loc, basestring):
+                if isinstance(loc, str):
                     loc, name = name, loc
                 setattr(self, name, loc)
             elif hasattr(self, attr):
@@ -366,7 +366,7 @@ class GLShader(object):
                           "linking")
         gl.UseProgram(self.program)
         for name in attributes:
-            if isinstance(name, basestring) and not(hasattr(self, attr)):
+            if isinstance(name, str) and not(hasattr(self, attr)):
                 setattr(self, name, int(gl.GetAttribLocation(self.program, name)))
         for u in uniforms:
             loc = int(gl.GetUniformLocation(self.program, u[0]))
@@ -389,7 +389,7 @@ class GLShader(object):
         except AttributeError:
             try:
                 self._instance = self()
-            except GLShaderCompileError, e:
+            except GLShaderCompileError as e:
                 self._instance = None
                 raise
             return self._instance

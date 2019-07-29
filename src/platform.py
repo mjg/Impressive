@@ -32,7 +32,7 @@ class Platform_PyGame(object):
         flags = OPENGL | DOUBLEBUF
         if Fullscreen:
             if FakeFullscreen:
-                print >>sys.stderr, "Using \"fake-fullscreen\" mode."
+                print("Using \"fake-fullscreen\" mode.", file=sys.stderr)
                 flags |= NOFRAME
                 if not WindowPos:
                     WindowPos = (0,0)
@@ -70,11 +70,11 @@ class Platform_PyGame(object):
         pygame.quit()
 
     def SetWindowTitle(self, text):
-        if not isinstance(text, unicode):
+        if not isinstance(text, str):
             try:
-                text = unicode(text, 'utf-8')
+                text = str(text, 'utf-8')
             except UnicodeDecodeError:
-                text = unicode(text, 'windows-1252', 'replace')
+                text = str(text, 'windows-1252', 'replace')
         try:
             pygame.display.set_caption(text, __title__)
         except UnicodeEncodeError:

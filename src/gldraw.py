@@ -323,9 +323,9 @@ def PrepareCustomCursor(cimg):
         CursorHotspot = (1,0)
         cimg = Image.open(cStringIO.StringIO(DEFAULT_CURSOR.decode('base64')))
     w, h = cimg.size
-    tw, th = map(npot, cimg.size)
+    tw, th = list(map(npot, cimg.size))
     if (tw > 256) or (th > 256):
-        print >>sys.stderr, "Custom cursor is ridiculously large, reverting to normal one."
+        print("Custom cursor is ridiculously large, reverting to normal one.", file=sys.stderr)
         return False
     img = Image.new('RGBA', (tw, th))
     img.paste(cimg, (0, 0))

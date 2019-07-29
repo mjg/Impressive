@@ -1,6 +1,6 @@
-TopLeft, BottomLeft, TopRight, BottomRight, TopCenter, BottomCenter = range(6)
-NoCache, MemCache, CompressedCache, FileCache, PersistentCache = range(5)  # for CacheMode
-Off, First, Last = range(3)  # for AutoOverview
+TopLeft, BottomLeft, TopRight, BottomRight, TopCenter, BottomCenter = list(range(6))
+NoCache, MemCache, CompressedCache, FileCache, PersistentCache = list(range(5))  # for CacheMode
+Off, First, Last = list(range(3))  # for AutoOverview
 
 # You may change the following lines to modify the default settings
 Verbose = False

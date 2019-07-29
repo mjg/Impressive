@@ -2,13 +2,13 @@
 
 # force a string or sequence of ordinals into a unicode string
 def ForceUnicode(s, charset='iso8859-15'):
-    if type(s) == types.UnicodeType:
+    if type(s) == str:
         return s
-    if type(s) == types.StringType:
-        return unicode(s, charset, 'ignore')
-    if type(s) in (types.TupleType, types.ListType):
-        return u''.join(map(unichr, s))
-    raise TypeError, "string argument not convertible to Unicode"
+    if type(s) == bytes:
+        return str(s, charset, 'ignore')
+    if type(s) in (tuple, list):
+        return ''.join(map(chr, s))
+    raise TypeError("string argument not convertible to Unicode")
 
 # search a system font path for a font file
 def SearchFont(root, name):
@@ -17,7 +17,7 @@ def SearchFont(root, name):
     infix = ""
     fontfile = []
     while (len(infix) < 10) and not(fontfile):
-        fontfile = filter(os.path.isfile, glob.glob(root + infix + name))
+        fontfile = list(filter(os.path.isfile, glob.glob(root + infix + name)))
         infix += "*/"
     if not fontfile:
         return None
@@ -57,8 +57,8 @@ class GLFont:
     def __init__(self, width, height, name, size, search_path=[], default_charset='iso8859-15', extend=1, blur=1):
         self.width = width
         self.height = height
-        self._i_extend = range(extend)
-        self._i_blur = range(blur)
+        self._i_extend = list(range(extend))
+        self._i_blur = list(range(blur))
         self.feather = extend + blur + 1
         self.current_x = 0
         self.current_y = 0
@@ -67,20 +67,20 @@ class GLFont:
         self.widths = {}
         self.line_height = 0
         self.default_charset = default_charset
-        if isinstance(name, basestring):
+        if isinstance(name, str):
             self.font = LoadFont(search_path, name, size)
         else:
             for check_name in name:
                 self.font = LoadFont(search_path, check_name, size)
                 if self.font: break
         if not self.font:
-            raise IOError, "font file not found"
+            raise IOError("font file not found")
         self.img = Image.new('LA', (width, height))
         self.alpha = Image.new('L', (width, height))
         self.extend = ImageFilter.MaxFilter()
         self.blur = ImageFilter.Kernel((3, 3), [1,2,1,2,4,2,1,2,1])
         self.tex = gl.make_texture(gl.TEXTURE_2D, filter=gl.NEAREST)
-        self.AddString(range(32, 128))
+        self.AddString(list(range(32, 128)))
         self.vertices = None
         self.index_buffer = None
         self.index_buffer_capacity = 0
@@ -134,7 +134,7 @@ class GLFont:
             self.current_y += self.max_height
             self.max_height = 0
         if self.current_y + h > self.height:
-            raise ValueError, "bitmap too small for all the glyphs"
+            raise ValueError("bitmap too small for all the glyphs")
         box = self.GlyphBox()
         box.orig_x = self.current_x
         box.orig_y = self.current_y
@@ -155,7 +155,7 @@ class GLFont:
         return self.default_charset
 
     def SplitText(self, s, charset=None):
-        return ForceUnicode(s, self.GetCharset(charset)).split(u'\n')
+        return ForceUnicode(s, self.GetCharset(charset)).split('\n')
 
     def GetLineHeight(self):
         return self.line_height
@@ -210,14 +210,14 @@ class GLFont:
             return
         char_count = len(self.vertices) / 16
         if char_count > 16383:
-            print >>sys.stderr, "Internal Error: too many characters (%d) to display in one go, truncating." % char_count
+            print("Internal Error: too many characters (%d) to display in one go, truncating." % char_count, file=sys.stderr)
             char_count = 16383
 
         # create an index buffer large enough for the text
         if not(self.index_buffer) or (self.index_buffer_capacity < char_count):
             self.index_buffer_capacity = (char_count + 63) & (~63)
             data = []
-            for b in xrange(0, self.index_buffer_capacity * 4, 4):
+            for b in range(0, self.index_buffer_capacity * 4, 4):
                 data.extend([b+0, b+2, b+1, b+1, b+2, b+3])
             if not self.index_buffer:
                 self.index_buffer = gl.GenBuffers()

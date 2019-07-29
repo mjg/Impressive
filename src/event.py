@@ -61,7 +61,7 @@ class BaseDisplayActions(BaseActions):
                 return
             # invalidate everything we used to know about the input files
             InvalidateCache()
-            for props in PageProps.itervalues():
+            for props in PageProps.values():
                 for prop in ('_overview_rendered', '_box', '_href'):
                     if prop in props: del props[prop]
             LoadInfoScript()
@@ -259,7 +259,7 @@ class PageDisplayActions(BaseDisplayActions):
         x, y = Platform.GetMousePos()
         for valid, target, x0, y0, x1, y1 in GetPageProp(Pcurrent, '_href', []):
             if valid and (x >= x0) and (x < x1) and (y >= y0) and (y < y1):
-                if type(target) == types.IntType:
+                if type(target) == int:
                     TransitionTo(target, allow_transition=allow_transition)
                 elif target:
                     RunURL(target)

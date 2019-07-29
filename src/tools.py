@@ -3,7 +3,7 @@
 # read and write the PageProps and FileProps meta-dictionaries
 def GetProp(prop_dict, key, prop, default=None):
     if not key in prop_dict: return default
-    if type(prop) == types.StringType:
+    if type(prop) == bytes:
         return prop_dict[key].get(prop, default)
     for subprop in prop:
         try:
@@ -122,8 +122,8 @@ def analyze_pdf(filename):
     f = file(filename,"rb")
     pdf = f.read()
     f.close()
-    box = map(float, pdf.split("/MediaBox",1)[1].split("]",1)[0].split("[",1)[1].strip().split())
-    return (max(map(num, pdf.split("/Count")[1:])), box[2]-box[0], box[3]-box[1])
+    box = list(map(float, pdf.split("/MediaBox",1)[1].split("]",1)[0].split("[",1)[1].strip().split()))
+    return (max(list(map(num, pdf.split("/Count")[1:]))), box[2]-box[0], box[3]-box[1])
 
 # unescape &#123; literals in PDF files
 re_unescape = re.compile(r'&#[0-9]+;')
@@ -172,7 +172,7 @@ def pdftkParse(filename, page_offset=0):
     f.close()
     if AutoOverview:
         SetPageProp(page_offset + 1, '_overview', True)
-        for page in xrange(page_offset + 2, page_offset + Pages):
+        for page in range(page_offset + 2, page_offset + Pages):
             SetPageProp(page, '_overview', \
                         not(not(GetPageProp(page + AutoOverview - 1, '_title'))))
         SetPageProp(page_offset + Pages, '_overview', True)
@@ -204,7 +204,7 @@ def NormalizeRect(X0, Y0, X1, Y1):
 def InsideBox(x, y, box):
     return (x >= box[0]) and (y >= box[1]) and (x < box[2]) and (y < box[3])
 def FindBox(x, y, boxes):
-    for i in xrange(len(boxes)):
+    for i in range(len(boxes)):
         if InsideBox(x, y, boxes[i]):
             return i
     raise ValueError
@@ -238,7 +238,7 @@ def StopMPlayer():
         else:
             MPlayerProcess.stdin.write('quit\n')
         MPlayerProcess.stdin.flush()
-        for i in xrange(10):
+        for i in range(10):
             if MPlayerProcess.poll() is None:
                 time.sleep(0.1)
             else:
@@ -248,7 +248,7 @@ def StopMPlayer():
 
     # if that didn't work, be rude
     if MPlayerProcess.poll() is None:
-        print >>sys.stderr, "Audio/video player didn't exit properly, killing PID", MPlayerProcess.pid
+        print("Audio/video player didn't exit properly, killing PID", MPlayerProcess.pid, file=sys.stderr)
         try:
             if os.name == 'nt':
                 win32api.TerminateProcess(win32api.OpenProcess(1, False, MPlayerProcess.pid), 0)
@@ -289,9 +289,9 @@ def SafeCall(func, args=[], kwargs={}):
     try:
         return func(*args, **kwargs)
     except:
-        print >>sys.stderr, "----- Unhandled Exception ----"
+        print("----- Unhandled Exception ----", file=sys.stderr)
         traceback.print_exc(file=sys.stderr)
-        print >>sys.stderr, "----- End of traceback -----"
+        print("----- End of traceback -----", file=sys.stderr)
 
 def Quit(code=0):
     global CleanExit
@@ -299,6 +299,6 @@ def Quit(code=0):
         CleanExit = True
     StopMPlayer()
     Platform.Done()
-    print >>sys.stderr, "Total presentation time: %s." % \
-                        FormatTime((Platform.GetTicks() - StartTime) / 1000)
+    print("Total presentation time: %s." % \
+                        FormatTime((Platform.GetTicks() - StartTime) / 1000), file=sys.stderr)
     sys.exit(code)
