@@ -23,7 +23,7 @@ def pdf_unmaskstring(s):
 
 class PDFParser:
     def __init__(self, filename):
-        self.f = file(filename, "rb")
+        self.f = open(filename, "rb")
         self.errors = 0
 
         # find the first cross-reference table

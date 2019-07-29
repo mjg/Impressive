@@ -28,33 +28,37 @@ import sys
 if __rev__ and (("WIP" in __version__) or ("rc" in __version__) or ("alpha" in __version__) or ("beta" in __version__)):
     __version__ += " (SVN r%s)" % __rev__
 def greet():
-    print("Welcome to", __title__, "version", __version__, file=sys.stderr)
+    print("Welcome to" + __title__ + "version" + __version__ , file=sys.stderr)
 if __name__ == "__main__":
     greet()
 
+def execfile(f, c):
+    with open(f) as h:
+        code = compile(h.read(), f, 'exec')
+        exec(code, c)
 
-exec(compile(open("src/defaults.py", "rb").read(), "src/defaults.py", 'exec'), globals())
-exec(compile(open("src/init.py", "rb").read(), "src/init.py", 'exec'), globals())
-exec(compile(open("src/globals.py", "rb").read(), "src/globals.py", 'exec'), globals())
-exec(compile(open("src/platform.py", "rb").read(), "src/platform.py", 'exec'), globals())
-exec(compile(open("src/tools.py", "rb").read(), "src/tools.py", 'exec'), globals())
-exec(compile(open("src/glcore.py", "rb").read(), "src/glcore.py", 'exec'), globals())
-exec(compile(open("src/shaders.py", "rb").read(), "src/shaders.py", 'exec'), globals())
-exec(compile(open("src/gltools.py", "rb").read(), "src/gltools.py", 'exec'), globals())
-exec(compile(open("src/transitions.py", "rb").read(), "src/transitions.py", 'exec'), globals())
-exec(compile(open("src/osdfont.py", "rb").read(), "src/osdfont.py", 'exec'), globals())
-exec(compile(open("src/pdfparse.py", "rb").read(), "src/pdfparse.py", 'exec'), globals())
-exec(compile(open("src/cache.py", "rb").read(), "src/cache.py", 'exec'), globals())
-exec(compile(open("src/render.py", "rb").read(), "src/render.py", 'exec'), globals())
-exec(compile(open("src/scriptwriter.py", "rb").read(), "src/scriptwriter.py", 'exec'), globals())
-exec(compile(open("src/gldraw.py", "rb").read(), "src/gldraw.py", 'exec'), globals())
-exec(compile(open("src/control.py", "rb").read(), "src/control.py", 'exec'), globals())
-exec(compile(open("src/evcore.py", "rb").read(), "src/evcore.py", 'exec'), globals())
-exec(compile(open("src/overview.py", "rb").read(), "src/overview.py", 'exec'), globals())
-exec(compile(open("src/event.py", "rb").read(), "src/event.py", 'exec'), globals())
-exec(compile(open('src/filelist.py', "rb").read(), 'src/filelist.py', 'exec'), globals())
-exec(compile(open('src/main.py', "rb").read(), 'src/main.py', 'exec'), globals())
-exec(compile(open("src/options.py", "rb").read(), "src/options.py", 'exec'), globals())
+execfile("src/defaults.py", globals())
+execfile("src/init.py", globals())
+execfile("src/globals.py", globals())
+execfile("src/platform.py", globals())
+execfile("src/tools.py", globals())
+execfile("src/glcore.py", globals())
+execfile("src/shaders.py", globals())
+execfile("src/gltools.py", globals())
+execfile("src/transitions.py", globals())
+execfile("src/osdfont.py", globals())
+execfile("src/pdfparse.py", globals())
+execfile("src/cache.py", globals())
+execfile("src/render.py", globals())
+execfile("src/scriptwriter.py", globals())
+execfile("src/gldraw.py", globals())
+execfile("src/control.py", globals())
+execfile("src/evcore.py", globals())
+execfile("src/overview.py", globals())
+execfile("src/event.py", globals())
+execfile('src/filelist.py', globals())
+execfile('src/main.py', globals())
+execfile("src/options.py", globals())
 
 
 # use this function if you intend to use Impressive as a library

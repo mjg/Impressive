@@ -53,7 +53,7 @@ class Platform_PyGame(object):
             raise ImportError("failed to load SDL_GL_GetProcAddress from the SDL library")
         def loadsym(name, prototype):
             try:
-                addr = get_proc_address(name)
+                addr = get_proc_address(name.encode())
             except EnvironmentError:
                 return None
             if not addr:
@@ -211,7 +211,7 @@ class Platform_Win32(Platform_PyGame):
                 pass
             # if that fails, load the extension function via wglGetProcAddress
             try:
-                addr = get_proc_address(name)
+                addr = get_proc_address(str(name))
             except EnvironmentError:
                 addr = None
             if not addr:
@@ -229,7 +229,7 @@ class Platform_Unix(Platform_PyGame):
         try:
             xrandr = subprocess.Popen(["xrandr"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             for line in xrandr.stdout:
-                m = re_res.match(line)
+                m = re_res.match(line.decode())
                 if m:
                     res = tuple(map(int, m.groups()))
             xrandr.wait()

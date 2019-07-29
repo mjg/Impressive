@@ -42,7 +42,7 @@ class PDFRendererBase(object):
             raise RendererUnavailable("program not found")
 
         # parse the output into an option list
-        data = [line.strip().replace('\t', ' ') for line in data.split('\n')]
+        data = [line.strip().replace('\t', ' ') for line in data.decode().split('\n')]
         self.options = set([line.split(' ', 1)[0].split('=', 1)[0].strip('-,') for line in data if line.startswith('-')])
         if not(set(self.required_options) <= self.options):
             raise RendererUnavailable("%s does not support all required options" % os.path.basename(self.command[0]))

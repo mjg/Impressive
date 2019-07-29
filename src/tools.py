@@ -44,7 +44,7 @@ def SetFileProp(page, prop, value):
     SetProp(FileProps, page, prop, value)
 
 # the Impressive logo (256x64 pixels grayscale PNG)
-LOGO = """iVBORw0KGgoAAAANSUhEUgAAAQAAAABACAAAAADQNvZiAAAL8ElEQVR4Xu2Ze1hVVfrHv+cc7siAEiF4AW1QEkmD8pJUWlkaaSWWk9pk5ZT5szKvPydvoVhqKuWY9jhkmjZpmZmO9wwzLwhiCImAeEFEkJtyk/se17tZ66yz9zlp+IcPD3z++Z79ujxrne963/XupWjytNCCy5QtuXm/vueAxmBAk8dnWyhpWkhFszTA7VR7qMy
+LOGO = b"""iVBORw0KGgoAAAANSUhEUgAAAQAAAABACAAAAADQNvZiAAAL8ElEQVR4Xu2Ze1hVVfrHv+cc7siAEiF4AW1QEkmD8pJUWlkaaSWWk9pk5ZT5szKvPydvoVhqKuWY9jhkmjZpmZmO9wwzLwhiCImAeEFEkJtyk/se17tZ66yz9zlp+IcPD3z++Z79ujxrne963/XupWjytNCCy5QtuXm/vueAxmBAk8dnWyhpWkhFszTA7VR7qMy
 ajz+PEUS/RXO7omnyDP/9eBKNNuCdg1Pn/PYUmiQR4HRutAEeiwyA0yo0RVwGg1PYaAO6OQKAfys0Qbq6gHO60QacVQCgoAxNkPa4PQPsmOQumQIoU9BI5gYCyHy/CRuAqb8Pq4jZi0byakcA36MpG4Avv0SjcaQ1ZNxxA5S0xnWB26YTfccZ3Bl8wMmquEMG/BV3MgPcwTmJZmnAX8D55U4ZcA+T8hwArd3xJ3H0gnU8nGENVzfbGRCLW8Xe2
 2BpQN/+NwgE0ZV9DgMRPGHp11Gj3SGwD5+8KubtMKM+AwrHLNmdU3S1Mml2F+0K+zPaAHAY/fH6mY+D4/X2ocLKK3nb5z4CS3quPphXXJaxZf6TkPH75KeLpSUXdix+wWQtA0pOMAljk3WChAvN30GMf3Xflarcor0LnobAWKncYAmIbexzOgDD6CMKkTOczzX1okLs84FEhmJB3edekImgaAjw6Dn24Te+rsU1CifaHmY8V9YpnKNmC5znVoh
 w2kixBSYR/C8Yx9nDRkjMoEXdC8JuernC+aYVz4AOjtIxHsAkDfDf91UfED7fqg4MOL2oPYjHk7pBYOevKao3knvoj4h0dP1BHtgneYodOO8eaA+O76lxRnB67z74CAjnuDnO4HTZkCw2RVMBR+ivwYzbFCbfpKrpHf+RCzgj4oPIAFqiMMDUSTXgheTHIFh5N2CKlPbdaykEHe2gwTu2j9aAnDLP7R4wE7a3MyT6Jt4NFcOX9EkQ9imIRcGQ6
@@ -119,7 +119,7 @@ def my_stat(filename):
 
 # determine (pagecount,width,height) of a PDF file
 def analyze_pdf(filename):
-    f = file(filename,"rb")
+    f = open(filename,"rb")
     pdf = f.read()
     f.close()
     box = list(map(float, pdf.split("/MediaBox",1)[1].split("]",1)[0].split("[",1)[1].strip().split()))
@@ -141,7 +141,7 @@ def unescape_pdf(s):
 
 # parse pdftk output
 def pdftkParse(filename, page_offset=0):
-    f = file(filename, "r")
+    f = open(filename, "r")
     InfoKey = None
     BookmarkTitle = None
     Title = None
@@ -183,6 +183,7 @@ def mutoolParse(f, page_offset=0):
     title = None
     pages = 0
     for line in f:
+        line = line.decode()
         m = re.match("pages:\s*(\d+)", line, re.I)
         if m and not(pages):
             pages = int(m.group(1))
